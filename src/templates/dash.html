@@ -7,10 +7,21 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎥</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <nav class="bg-white max-w-2xl w-full p-4 rounded-lg shadow my-3 flex justify-between">
+        <p class="text-gray-600">
+            Créditos: {{credits}}
+        </p>
+        <button
+        id="topCreditsButton"
+        class="text-gray-600 hover:text-gray-800 hover:border-l pl-3 hover:border-gray-600">
+            Recargar créditos
+        </button>
+    </nav>
     <article class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
         <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Anima cualquier imagen con AI</h1>
-        <p class="text-gray-600 mb-6 text-center">Sube tu imagen y conviértela en un video MP4 cortito.</p>
+        <p class="text-gray-600 mb-2 text-center">Sube tu imagen y conviértela en un video MP4 cortito.</p>
+        <p class="text-gray-500 mb-6 text-center text-xs">Soporta: png, jpg y webp.</p>
         
         <form id="image-upload-form" enctype="multipart/form-data" class="space-y-4">
             <div class="flex items-center justify-center w-full" >
@@ -20,9 +31,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
                         <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
-                        <p class="text-xs text-gray-500">PNG o JPG (MAX. 10MB)</p>
+                        <p class="text-xs text-gray-500">MAX. 10MB</p>
                     </div>
-                    <input id="image" name="image" type="file" class="hidden" accept="image/png,image/jpeg" required />
+                    <input id="image" name="image" type="file" class="hidden" accept="image/png,image/jpeg,image/webp" required />
                 </label>
             </div>
             <div id="preview" class="hidden relative">
@@ -59,9 +70,85 @@
             <h3 class="font-medium text-gray-700 mb-2">Resultado:</h3>
             <div id="resultContent" class="text-sm text-gray-600"></div>
         </div>
+        <div id="prevVideos" class="mt-8 p-4 bg-gray-50 rounded-lg hidden">
+            <h3 class="font-medium text-gray-700 mb-2">Videos anteriores:</h3>
+            <div id="prevVideosContent" class="text-sm text-gray-600"></div>
+        </div>
     </article>
+    <!-- footer -->
+    <footer class="">
+        <p class="text-center text-gray-600 text-xs my-3">© 2025 AI Image to Video. by: 
+
+            <a href="https://fixter.org" class="underline text-indigo-600">Fixter.org</a>
+        </p>
+    </footer>
+
+    <!-- // modal -->
+     <article id="creditsModal" class="hidden">
+        <div  class="fixed inset-0 z-50 overflow-y-auto">
+            <button id="closeModalButton" class="absolute top-6 right-6 z-10 text-white">
+                Cerrar
+            </button>
+            <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-50 backdrop-blur-sm">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-lg font-semibold mb-4">Compra un paquete de créditos</h2>
+                    <p class="text-xs">Compra solo los que necesites o aprovecha la oferta.</p>
+                    
+                    <section class="grid grid-cols-3 gap-4">
+                    <button 
+
+                        class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
+                        <p>10 créditos</p>
+                        <p class="text-xs">$150</p>
+                        </button>
+                    <button
+
+                         class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
+                            <p>20  créditos</p>
+                            <p class="text-xs">$280</p>
+                            </button>
+                    <button 
+
+                            class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
+                                <p>100  créditos</p>
+                                <p class="text-xs">$999</p>
+                            </button>
+                   <button 
+                            disabled
+                            onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
+                              <p>500  créditos</p>
+                            <p class="text-xs">$3,900</p>
+                            </button>
+                <button disabled onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
+                              <p>1000  créditos</p>
+                            <p class="text-xs">$9,900</p>
+                            </button>
+                      <button disabled onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
+                                <p>2000  créditos</p>
+                            <p class="text-xs">$19,900</p>
+                            </button>
+                    </section>
+                </div>
+            </div>
+        </div>
+     </article>
 
     <script src="/js/useFileDrop.js"></script>
+    <script>
+// local storage
+        const saveLocal = (videoId) => {
+                    const videIds = localStorage.getItem('videoIds') || '[]';
+                    const videoIds = JSON.parse(videIds);
+                    videoIds.push(videoId);
+                    localStorage.setItem('videoIds', JSON.stringify(videoIds));
+                }
+
+                const getLocal = () => {
+                    const videIds = localStorage.getItem('videoIds') || '[]';
+                    const videoIds = JSON.parse(videIds);
+                    return videoIds;
+                }
+    </script>
     <script>
         // Preview image before upload
         const imageInput = document.getElementById('image');
@@ -84,15 +171,33 @@
         } else {
             console.error('useFileDrop is not available');
         }
+
+        // list prev video ids
+        const videoIds = getLocal();
+        console.log("videoIds", videoIds);  
+        const prevVideosContent = document.getElementById('prevVideosContent');
+        if (prevVideosContent && videoIds.length > 0) {
+            prevVideosContent.innerHTML = videoIds.map(id => `<p>${id}</p>`).join('');
+        }
+
         let state = 'idle';
         function setState(st){
+            console.log("::STATE::", st)
             state=st
-            if(state === 'loading'){
+            if(state === 'error'){
+                spinner.classList.add('hidden');
+            }else if(state === 'loading'){
                 spinner.classList.remove('hidden');
             } else if(state === 'working'){
+                dropZone.classList.add('hidden');
+                result.classList.remove('hidden');
                 spinner.classList.remove('hidden');
+                preview.classList.remove('hidden');
             }else if(state === 'done'){
+                dropZone.classList.add('hidden');
                 spinner.classList.add('hidden');
+                preview.classList.remove('hidden');
+                result.classList.remove('hidden');
             } else{
                 spinner.classList.add('hidden');
             }
@@ -157,7 +262,9 @@
                         `;
                         startPolling(data.videoId);
                     } else {
-                        resultContent.textContent = `Error: ${data.error || 'Error desconocido'}`;
+                        resultContent.style.color = 'red';
+                        resultContent.textContent = `Error Al Subir la Imagen. \n\n Verifica el formato e intenta de nuevo.`;
+                        setState('error');
                     }
                     
                     resultDiv.classList.remove('hidden');
@@ -180,6 +287,7 @@
                 clearInterval(pollingInterval);
                 pollingInterval = null;
             }
+            // Reset polling attempts counter
             pollingAttempts = 0;
         }
 
@@ -238,6 +346,7 @@
                     `;
                     clearPolling();
                     setState('done');
+                    saveLocal(videoId)
                 } 
                 // Handle JSON response (processing or error)
                 else {
@@ -248,7 +357,6 @@
                             // Still processing
                             resultContent.innerHTML = `
                                 <div class="flex items-center gap-2">
-                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
                                     <p>${data.message || 'Procesando video...'}</p>
                                 </div>
                                 <p class="text-sm text-gray-600 mt-2">
@@ -311,7 +419,48 @@
             dropZone.style.display = 'block';
             imageInput.value = '';
         }
+    </script>
+    <script>
+        let showCreditsModal = false
+        // update hack
+        const updateUI = () => {
+            if(!showCreditsModal){
+                creditsModal.classList.add('hidden')
+            }else{
+                creditsModal.classList.remove('hidden')
+            }
+        }
+        // Credits stuff    
+        const topCreditsButton = document.getElementById('topCreditsButton');
+        const closeModalButton = document.getElementById('closeModalButton');
+// listeners
+        topCreditsButton.addEventListener('click', () => {
+            showCreditsModal = true
+            updateUI()
+        })
 
+        closeModalButton.addEventListener('click', () => {
+            showCreditsModal = false
+            updateUI()
+        })
+
+        topCreditsButton.addEventListener('click', () => {
+
+            updateUI()
+        })
+
+        // get checkout urls and set listener
+        const setStripeLinks = async()=>{
+            const response = await fetch('/checkout')
+                const data = await response.json()
+         
+                const urls = data.urls
+                urls.forEach((url, index) => {
+                document.querySelectorAll(`.credits_button`)[index].addEventListener('click', () => (window.location.href = url.url))
+                })
+        }
+
+     window.addEventListener('DOMContentLoaded', setStripeLinks) // triggering at start
 
     </script>
 </body>

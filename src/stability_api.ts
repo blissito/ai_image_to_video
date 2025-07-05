@@ -61,15 +61,25 @@ const outputPath = path.join(__dirname, '..', 'output.mp4');
 // Función para esperar un tiempo determinado
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Función para redimensionar la imagen al tamaño más adecuado
+/**
+ * Redimensiona y convierte la imagen al formato JPEG con el tamaño más adecuado
+ * @param inputPath Ruta del archivo de entrada
+ * @param outputPath Ruta donde se guardará la imagen procesada (debe terminar en .jpg)
+ * @returns La ruta de la imagen procesada
+ */
 export async function resizeImage(inputPath: string, outputPath: string): Promise<string> {
   try {
+    // Forzar extensión .jpg en el archivo de salida
+    const outputJpgPath = outputPath.endsWith('.jpg') ? outputPath : `${outputPath.split('.')[0]}.jpg`;
+    
+    // Obtener metadatos de la imagen de entrada
     const metadata = await sharp(inputPath).metadata();
     
     if (!metadata.width || !metadata.height) {
       throw new Error('No se pudieron obtener las dimensiones de la imagen');
     }
 
+    // Determinar el tamaño objetivo basado en la relación de aspecto
     const aspectRatio = metadata.width / metadata.height;
     let targetSize;
 
@@ -83,20 +93,27 @@ export async function resizeImage(inputPath: string, outputPath: string): Promis
 
     console.log(`Redimensionando imagen de ${metadata.width}x${metadata.height} a ${targetSize.width}x${targetSize.height}...`);
     
+    // Procesar la imagen: redimensionar, convertir a JPEG y optimizar
     await sharp(inputPath)
       .resize({
         width: targetSize.width,
         height: targetSize.height,
         fit: 'cover',
-        position: 'center'
+        position: 'center',
+        withoutEnlargement: true // Evitar agrandar imágenes pequeñas
       })
-      .toFile(outputPath);
+      .jpeg({
+        quality: 90, // Calidad alta pero con buena compresión
+        mozjpeg: true, // Usar compresión optimizada de MozJPEG
+        chromaSubsampling: '4:4:4' // Máxima calidad de crominancia
+      })
+      .toFile(outputJpgPath);
     
-    console.log('Imagen redimensionada correctamente');
-    return outputPath;
+    console.log('Imagen redimensionada y convertida a JPEG correctamente');
+    return outputJpgPath;
   } catch (error) {
-    console.error('Error al redimensionar la imagen:', error);
-    throw error;
+    console.error('Error al procesar la imagen:', error);
+    throw new Error(`Error al procesar la imagen: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

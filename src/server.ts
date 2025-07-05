@@ -6,6 +6,7 @@ import fs from 'fs';
 import multer from 'multer';
 import { putImage } from './stability_api';
 import axios from 'axios';
+import { makeCheckoutUrls } from './stripe';
 
 
 // Load environment variables
@@ -62,6 +63,11 @@ app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'templates/dash.html'));
 });
 
+
+app.get('/checkout', async (req: Request, res: Response) => {
+    const urls = await makeCheckoutUrls();
+    res.json({ urls });
+});
 
 // Handle polling
 app.get('/poll', async (req: Request, res: Response) => {
