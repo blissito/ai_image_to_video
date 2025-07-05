@@ -2,6 +2,8 @@
 
 Este proyecto contiene un script de TypeScript para consumir la API de Image-to-Video de Stability AI. El script toma una imagen de entrada y genera un video a partir de ella.
 
+> Usa esta app en producción: [https://image-to-video.fly.dev](https://image-to-video.fly.dev)
+
 ## Requisitos
 
 - Node.js (v18 o superior)
