@@ -1,13 +1,28 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
+import Stripe from 'stripe';
 import { putImage } from './stability_api';
 import axios from 'axios';
 import { makeCheckoutUrls } from './stripe';
+import { getUser, updateUserCredits } from './db_setters';
+import { sendMagicLink } from './emails';
+import { verifyMagicToken } from './tokens';
 
+// Extend the Express Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        email: string;
+      };
+    }
+  }
+}
 
 // Load environment variables
 dotenv.config();
@@ -21,6 +36,7 @@ const UPLOAD_DIR = path.join(__dirname, '../uploads');
 const PUBLIC_DIR = path.join(__dirname, '../public');
 
 const app = express();
+app.use(cookieParser());
 
 // Ensure upload and public directories exist
 [UPLOAD_DIR, path.join(PUBLIC_DIR, 'css')].forEach(dir => {
@@ -40,6 +56,62 @@ const storage = multer.diskStorage({
   },
 });
 
+
+
+// Stripe webhook handler - MUST BE DEFINED BEFORE any body-parsing middleware
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
+  const sig = req.headers['stripe-signature'] as string;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!sig) {
+    console.error('No se encontró la firma de Stripe');
+    return res.status(400).send('Falta la firma de Stripe');
+  }
+
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET no está configurado');
+    return res.status(500).json({ error: 'Webhook secret no configurado' });
+  }
+
+  let event: Stripe.Event;
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2025-06-30.basil',
+  });
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body, // req.body is the raw buffer from express.raw
+      sig,
+      webhookSecret
+    );
+  } catch (err: any) {
+    console.error(`Webhook signature verification failed: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      console.info('💳 Pago procesado exitosamente:', {
+        paymentIntentId: paymentIntent.id,
+        amount: paymentIntent.amount,
+        customer_email: paymentIntent.receipt_email,
+        status: paymentIntent.status,
+        metadata: paymentIntent.metadata
+      });
+      updateUserCredits({
+        email: paymentIntent.receipt_email!,
+        credits: parseInt(paymentIntent.metadata.credits || '0')
+      });
+      break;
+
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  res.json({ received: true });
+});
+
 const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
@@ -52,24 +124,71 @@ const upload = multer({
   },
 });
 
-// Middleware
+// Global middlewares for all other routes
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Static file serving
 app.use(express.static(PUBLIC_DIR));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
-// Serve the dashboard
+// Session check middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const sessionToken = req.cookies?.__session;
+  
+  // Skip session check for public routes
+  const publicRoutes = ['/login', '/magic-link'];
+  if (publicRoutes.includes(req.path)) {
+    return next();
+  }
+
+  if (sessionToken) {
+    try {
+      const decoded = verifyMagicToken(sessionToken);
+      if (decoded) {
+        // Attach user email to the request object for use in route handlers
+        req.user = { email: decoded.email };
+        return next();
+      }
+    } catch (error) {
+      console.error('Session token verification failed:', error);
+      // Clear invalid session cookie
+      res.clearCookie('__session');
+    }
+  }
+
+  // If we get here, the user is not authenticated
+  next();
+});
+
+app.get('/session', (req: Request, res: Response) => {
+  const sessionToken = req.cookies?.__session;
+  if (sessionToken) {
+    try {
+      const decoded = verifyMagicToken(sessionToken);
+      if (decoded) {
+        const user = getUser(decoded.email);
+       return res.json({ success: true, user});
+      }
+    } catch (error) {
+      console.error('Session token verification failed:', error);
+      // Clear invalid session cookie
+      res.clearCookie('__session');
+    }
+  }
+   res.json({ success: false });
+});
+
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, 'templates/dash.html'));
 });
 
-
 app.get('/checkout', async (req: Request, res: Response) => {
-    const urls = await makeCheckoutUrls();
-    res.json({ urls });
+  const urls = await makeCheckoutUrls();
+  res.json({ urls });
 });
 
-// Handle polling
 app.get('/poll', async (req: Request, res: Response) => {
   try {
     const videoId = req.query.videoId;
@@ -184,9 +303,86 @@ app.post('/upload', upload.single('image'), async (req: Request | any, res: Resp
   }
 });
 
+// Magic link
+app.get('/magic-link', async (req: Request, res: Response) => {
+  const email = req.query.email as string;
+  const token = req.query.token as string;
+  const isDev = process.env.NODE_ENV === 'development';
+
+  // If token is provided, verify it
+  if (token) {
+    const decoded = verifyMagicToken(token);
+    if (!decoded) {
+      return res.status(400).send('Token inválido o expirado');
+    }
+    
+    // Set session cookie
+    res.cookie('__session', token, {
+      httpOnly: true,
+      secure: !isDev, // Only secure in production
+      maxAge: 15 * 60 * 1000, // 15 minutes
+      sameSite: isDev ? 'lax' : 'strict',
+      path: '/'
+    });
+    return res.redirect('/');
+  }
+  
+  // If no token but email is provided, send magic link
+  if (email) {
+    try {
+      const result = await sendMagicLink(email);
+      
+      if (isDev) {
+        // In development, return the magic link directly
+        return res.json({
+          success: true,
+          message: 'Development mode - use this link to login',
+          magicLink: `${req.protocol}://${req.get('host')}/magic-link?token=${result}`,
+          token: result
+        });
+      }
+      
+      // In production, just confirm the email was sent
+      const response: any = {
+        success: true,
+        message: 'Magic link sent to your email'
+      };
+      
+      if (isDev) {
+        response.debug = result;
+      }
+      
+      return res.json(response);
+      
+    } catch (error) {
+      console.error('Error sending magic link:', error);
+      const errorMessage = error instanceof Error 
+        ? `Error: ${error.message}`
+        : 'Error sending magic link. Please try again.';
+        
+      return res.status(500).json({
+        success: false,
+        error: isDev ? errorMessage : 'Error sending magic link. Please try again.'
+      });
+    }
+  }
+  
+  // No token or email provided
+  return res.status(400).json({
+    success: false,
+    error: 'Email or token is required'
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok' });
+});
+
+// Logout endpoint
+app.get('/logout', (req: Request, res: Response) => {
+  res.clearCookie('__session');
+  res.redirect('/');
 });
 
 // Error handling middleware

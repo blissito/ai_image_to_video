@@ -9,14 +9,21 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
     <nav class="bg-white max-w-2xl w-full p-4 rounded-lg shadow my-3 flex justify-between">
-        <p class="text-gray-600">
-            Créditos: {{credits}}
-        </p>
-        <button
-        id="topCreditsButton"
-        class="text-gray-600 hover:text-gray-800 hover:border-l pl-3 hover:border-gray-600">
+        <p class="text-gray-600 text-sm">
+            Créditos: <span id="topCredits">0</span> (1 crédito = 1 video)
+            <br>
+            <span class="text-xs text-gray-600">
+                No se descuentan los errores.
+            </span></p>
+                <button
+                id="topCreditsButton"
+        class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600">
             Recargar créditos
         </button>
+        <button
+        id="topLoginButton"
+        class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600 text-xs">
+Iniciar sesión        </button>
     </nav>
     <article class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
         <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Anima cualquier imagen con AI</h1>
@@ -132,6 +139,30 @@
             </div>
         </div>
      </article>
+
+         <!-- // modal login -->
+         <article id="loginModal" class="hidden">
+            <div  class="fixed inset-0 z-50 overflow-y-auto">
+                <button id="closeLoginModalButton" class="absolute top-6 right-6 z-10 text-white">
+                    Cerrar
+                </button>
+                <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-50 backdrop-blur-sm">
+                    <form id="loginForm" class="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold mb-4">Iniciar sesión</h2>
+                        <div class="">
+                            <label for="email" class="block text-gray-700 font-medium mb-2">Correo electrónico</label>
+                            <input type="email" id="email" name="email" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                      <span class="text-xs mb-4 text-gray-400">No compartiremos tu correo con nadie.</span>
+                        <div id="loginStatus" class="mb-4 text-sm hidden"></div>
+                        <button id="loginButton" type="submit" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed block ml-auto mt-2 px-4 py-2 rounded enabled:hover:border-black border">
+                           Solicitar llave
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </article>
 
     <script src="/js/useFileDrop.js"></script>
     <script>
@@ -462,6 +493,103 @@
 
      window.addEventListener('DOMContentLoaded', setStripeLinks) // triggering at start
 
+    </script>
+    <script>
+        // login modal
+        const loginModal = document.getElementById('loginModal');
+        const closeLoginModalButton = document.getElementById('closeLoginModalButton');
+        closeLoginModalButton.addEventListener('click', () => {
+            loginModal.classList.add('hidden')
+        })
+
+        topLoginButton.addEventListener('click', () => {
+            loginModal.classList.remove('hidden')
+        })
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value.trim();
+            const loginButton = document.getElementById('loginButton');
+            const loginStatus = document.getElementById('loginStatus');
+            
+            if (!email) {
+                loginStatus.textContent = 'Por favor ingresa un correo electrónico';
+                loginStatus.classList.remove('hidden', 'text-green-500');
+                loginStatus.classList.add('text-red-500');
+                return;
+            }
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Enviando...';
+            loginStatus.textContent = 'Enviando enlace mágico...';
+            loginStatus.classList.remove('hidden', 'text-red-500');
+            loginStatus.classList.add('text-blue-500');
+
+            try {
+                const response = await fetch(`/magic-link?email=${encodeURIComponent(email)}`);
+                const data = await response.json();
+
+                console.log("::DATA::",data)
+                
+                if (response.ok) {
+                    loginStatus.textContent = '¡Revisa tu correo para el enlace de inicio de sesión!';
+                    loginStatus.classList.remove('text-blue-500', 'text-red-500');
+                    loginStatus.classList.add('text-green-500');
+                    
+                    // En development, NO SE ENVIAN CORREOS
+                    if (data.debug && data.debug.message) {
+                        console.log('Magic Link:', data.debug.message);
+                    }
+                    
+                    // Close modal after a short delay
+                    setTimeout(() => {
+                        loginModal.classList.add('hidden');
+                        loginStatus.textContent = '';
+                        loginStatus.classList.add('hidden');
+                        loginForm.reset();
+                    }, 10000);
+                } else {
+                    throw new Error(data.error || 'Error al enviar el enlace');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                loginStatus.textContent = error.message || 'Error al enviar el enlace. Intenta de nuevo.';
+                loginStatus.classList.remove('text-blue-500', 'text-green-500');
+                loginStatus.classList.add('text-red-500');
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Enviar';
+            }
+        });
+
+        // check if user is logged in
+        document.addEventListener('DOMContentLoaded', async() => {
+            console.log("Looking for user 👨🏻‍💻")
+          const response = await fetch('/session',{
+            includeCredentials: true
+          });
+          const data = await response.json();
+          if(data.success){
+            loginModal.classList.add('hidden');
+
+            // show credits
+            topCredits.textContent = data.user.credits;
+
+            topLoginButton.innerHTML = `
+                <div>
+                <p>${data.user.email}</p>
+                <span class="text-xs">Cerrar sesión</span>
+                </div>
+                `;
+            topLoginButton.removeEventListener('click', ()=>{}) // not working double listener (modal is openning)
+            topLoginButton.addEventListener('click', () => {
+                // document.cookie = "__session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // nice!
+                fetch('/logout',{includeCredentials: true})
+                topLoginButton.innerHTML = 'Iniciar sesión';
+            })
+          }
+
+        })
     </script>
 </body>
 </html>

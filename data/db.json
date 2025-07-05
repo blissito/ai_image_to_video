@@ -1,0 +1,10 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Blissmo",
+      "email": "fixtergeek@gmail.com",
+      "credits": 30
+    }
+  ]
+}
