@@ -16,7 +16,7 @@ const getClient = () => {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
-const success_url = isDev ? 'http://localhost:3000/?s=success' : 'https://stability-image-to-video.vercel.app/?s=success';
+const success_url = isDev ? 'http://localhost:3000/?s=success' : 'http://localhost:3000/?s=success';
 
 
 const generateCheckoutURL = (credits: number) => {

@@ -93,14 +93,24 @@ export async function resizeImage(inputPath: string, outputPath: string): Promis
 
     console.log(`Redimensionando imagen de ${metadata.width}x${metadata.height} a ${targetSize.width}x${targetSize.height}...`);
     
-    // Procesar la imagen: redimensionar, convertir a JPEG y optimizar
-    await sharp(inputPath)
+    // Primero redimensionamos manteniendo la relación de aspecto
+    // para que cubra el área objetivo
+    const pipeline = sharp(inputPath)
       .resize({
         width: targetSize.width,
         height: targetSize.height,
         fit: 'cover',
         position: 'center',
-        withoutEnlargement: true // Evitar agrandar imágenes pequeñas
+        withoutEnlargement: false // Permitir agrandar si es necesario
+      });
+
+    // Luego recortamos para asegurar las dimensiones exactas
+    const processed = await pipeline
+      .extract({
+        left: 0,
+        top: 0,
+        width: targetSize.width,
+        height: targetSize.height
       })
       .jpeg({
         quality: 90, // Calidad alta pero con buena compresión
@@ -108,6 +118,12 @@ export async function resizeImage(inputPath: string, outputPath: string): Promis
         chromaSubsampling: '4:4:4' // Máxima calidad de crominancia
       })
       .toFile(outputJpgPath);
+    
+    // Verificar las dimensiones finales
+    const finalMetadata = await sharp(outputJpgPath).metadata();
+    if (finalMetadata.width !== targetSize.width || finalMetadata.height !== targetSize.height) {
+      console.warn(`Advertencia: La imagen resultante tiene dimensiones inesperadas: ${finalMetadata.width}x${finalMetadata.height}`);
+    }
     
     console.log('Imagen redimensionada y convertida a JPEG correctamente');
     return outputJpgPath;

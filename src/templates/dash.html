@@ -10,10 +10,10 @@
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
     <nav class="bg-white max-w-2xl w-full p-4 rounded-lg shadow my-3 flex justify-between">
         <p class="text-gray-600 text-sm">
-            Créditos: <span id="topCredits">0</span> (1 crédito = 1 video)
+            Créditos: <span id="topCredits" class="font-bold text-lg text-indigo-600">0</span> (1 crédito = 1 video)
             <br>
             <span class="text-xs text-gray-600">
-                No se descuentan los errores.
+                No se cobran los errores.
             </span></p>
                 <button
                 id="topCreditsButton"
@@ -229,8 +229,9 @@ Iniciar sesión        </button>
                 spinner.classList.add('hidden');
                 preview.classList.remove('hidden');
                 result.classList.remove('hidden');
-            } else{
+            } else{ // idle
                 spinner.classList.add('hidden');
+                loginModal.classList.add('hidden')
             }
         }
         
@@ -294,7 +295,8 @@ Iniciar sesión        </button>
                         startPolling(data.videoId);
                     } else {
                         resultContent.style.color = 'red';
-                        resultContent.textContent = `Error Al Subir la Imagen. \n\n Verifica el formato e intenta de nuevo.`;
+                        resultContent.textContent = `Error: missing credits or session`;
+                        alert("Por favor, inicia sesión o recarga créditos para subir imágenes.") // @todo Error in response
                         setState('error');
                     }
                     
@@ -339,6 +341,7 @@ Iniciar sesión        </button>
             pollingAttempts++;
             if (pollingAttempts > maxPollingAttempts) {
                 showError('Tiempo de espera agotado. El video está tomando más tiempo de lo esperado.');
+                clearPolling(); // Clear on timeout
                 return;
             }
             
@@ -378,6 +381,7 @@ Iniciar sesión        </button>
                     clearPolling();
                     setState('done');
                     saveLocal(videoId)
+                    document.dispatchEvent(new CustomEvent('update_user'))
                 } 
                 // Handle JSON response (processing or error)
                 else {
@@ -420,14 +424,6 @@ Iniciar sesión        </button>
                     resultDiv.classList.remove('hidden');
                 }
                 clearPolling(); // Clear on error
-            }
-        }
-        
-        // Clear polling interval
-        function clearPolling() {
-            if (pollingInterval !== null) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
             }
         }
         
@@ -562,8 +558,7 @@ Iniciar sesión        </button>
             }
         });
 
-        // check if user is logged in
-        document.addEventListener('DOMContentLoaded', async() => {
+        const checkForUser = async()=> {
             console.log("Looking for user 👨🏻‍💻")
           const response = await fetch('/session',{
             includeCredentials: true
@@ -581,15 +576,24 @@ Iniciar sesión        </button>
                 <span class="text-xs">Cerrar sesión</span>
                 </div>
                 `;
-            topLoginButton.removeEventListener('click', ()=>{}) // not working double listener (modal is openning)
+// Logout listener
             topLoginButton.addEventListener('click', () => {
                 // document.cookie = "__session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // nice!
                 fetch('/logout',{includeCredentials: true})
                 topLoginButton.innerHTML = 'Iniciar sesión';
+                topCredits.textContent = '0';
+                setState('idle')
+                topLoginButton.addEventListener('click', () => {    
+                    loginModal.classList.remove('hidden')
+                })
             })
           }
 
-        })
+        }
+
+        // check if user is logged in
+        document.addEventListener('update_user',checkForUser )
+        document.addEventListener('DOMContentLoaded',checkForUser )
     </script>
 </body>
 </html>

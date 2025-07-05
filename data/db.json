@@ -4,7 +4,15 @@
       "id": 1,
       "name": "Blissmo",
       "email": "fixtergeek@gmail.com",
-      "credits": 30
+      "credits": 28,
+      "videoIds": [
+        "ae84bd1c56f65c596b23d62adf2b91fdbd751a50c6e11f1461de282ac2b31ded",
+        "ce120c454d4ba138b8f5280fdc0149e879b2921a0b29bd19da046d372194fcd6"
+      ],
+      "createdAt": "2025-07-05T15:53:23.000Z",
+      "updatedAt": "2025-07-05T22:48:30.205Z",
+      "deletedAt": null,
+      "bucketLinks": []
     }
   ]
 }

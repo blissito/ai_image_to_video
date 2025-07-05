@@ -9,7 +9,7 @@ import Stripe from 'stripe';
 import { putImage } from './stability_api';
 import axios from 'axios';
 import { makeCheckoutUrls } from './stripe';
-import { getUser, updateUserCredits } from './db_setters';
+import { getUser, sufficientCredits, updateUserCredits } from './db_setters';
 import { sendMagicLink } from './emails';
 import { verifyMagicToken } from './tokens';
 
@@ -101,7 +101,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req: Requ
       });
       updateUserCredits({
         email: paymentIntent.receipt_email!,
-        credits: parseInt(paymentIntent.metadata.credits || '0')
+        credits: parseInt(paymentIntent.metadata.credits || '0'),
+        // @revisit do we want to push id here?
       });
       break;
 
@@ -116,10 +117,10 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req: any, file: any, cb: any) => {
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'|| file.mimetype === 'image/webp') {
       cb(null, true);
     } else {
-      cb(new Error('Solo se permiten imágenes JPG o PNG'));
+      cb(new Error('Solo se permiten imágenes JPG, PNG o WEBP'));
     }
   },
 });
@@ -223,7 +224,7 @@ app.get('/poll', async (req: Request, res: Response) => {
       return res.status(202).json({ 
         success: false, 
         status: 'processing',
-        message: 'El video aún está en proceso de generación. Por favor, intente más tarde.' 
+        message: 'El video aún está en proceso de generación. Por favor, espere.' 
       });
     }
 
@@ -263,10 +264,10 @@ app.get('/poll', async (req: Request, res: Response) => {
   }
 });
 
-// Handle file upload
+// Handle file upload and generation
 app.post('/upload', upload.single('image'), async (req: Request | any, res: Response) => {
   try {
-    if (!req.file) {
+    if (!req.file || !req.user) {
       return res.status(400).json({ error: 'No se ha subido ningúna imagen' });
     }
 
@@ -278,6 +279,11 @@ app.post('/upload', upload.single('image'), async (req: Request | any, res: Resp
       size: req.file.size
     });
     
+    // Sufficient credits?
+    if(!sufficientCredits(req.user.email)){
+      return res.status(400).json({ error: 'No tienes créditos suficientes. Haz una recarga para continuar' });
+    }
+
     const response = await putImage(req.file.path, {
         filename: req.file.originalname,
         contentType: req.file.mimetype
@@ -288,6 +294,13 @@ app.post('/upload', upload.single('image'), async (req: Request | any, res: Resp
     if(!videoId ){
       return res.status(500).json({ error: 'Error al procesar la imagen' });
     }
+
+    // update points @TODO: real db! or email send?
+    updateUserCredits({
+      email: req.user?.email,
+      credits: -1,  
+      videoId
+    });
 
     res.json({
       success: true,
