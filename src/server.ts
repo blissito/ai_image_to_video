@@ -181,8 +181,12 @@ app.get('/session', (req: Request, res: Response) => {
    res.json({ success: false });
 });
 
+// Serve the dashboard
 app.get('/', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, 'templates/dash.html'));
+  // In production, the templates are in the same directory as the compiled JS
+  const templatePath = path.join(__dirname, 'templates/dash.html');
+  console.log('Serving template from:', templatePath);
+  res.sendFile(templatePath);
 });
 
 app.get('/checkout', async (req: Request, res: Response) => {
