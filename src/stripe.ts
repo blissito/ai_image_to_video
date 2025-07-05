@@ -16,8 +16,8 @@ const getClient = () => {
 }
 
 const isDev = process.env.NODE_ENV === 'development';
-const success_url = isDev ? 'http://localhost:3000/?s=success' : 'http://localhost:3000/?s=success';
-
+const success_url = isDev ? 'http://localhost:3000/?s=success' : 'https://image-to-video.fly.dev/?s=success';
+// @todo congrats screen
 
 const generateCheckoutURL = (credits: number) => {
     const client = getClient();

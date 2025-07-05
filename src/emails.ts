@@ -27,7 +27,7 @@ export const getSesRemitent = () =>
   process.env.SES_REMITENT || 'noreply@example.com';
 
 const isDev = process.env.NODE_ENV === 'development';
-const location = isDev ? 'http://localhost:3000' : 'http://localhost:3000';
+const location = isDev ? 'http://localhost:3000' : 'https://image-to-video.fly.dev';
 
 
 

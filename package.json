@@ -2,7 +2,7 @@
   "name": "stability-image-to-video",
   "version": "1.0.0",
   "description": "A TypeScript script to use the Stability AI Image-to-Video API.",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
