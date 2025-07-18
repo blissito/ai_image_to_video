@@ -1,481 +1,643 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Image to Video</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎥</text></svg>">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎥</text></svg>"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-    <nav class="bg-white max-w-2xl w-full p-4 rounded-lg shadow my-3 flex justify-between">
-        <p class="text-gray-600 text-sm">
-            Créditos: <span id="topCredits" class="font-bold text-lg text-indigo-600">0</span> (1 crédito = 1 video)
-            <br>
-            <span class="text-xs text-gray-600">
-                No se cobran los errores.
-            </span></p>
-                <button
-                id="topCreditsButton"
-        class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600">
-            Recargar créditos
-        </button>
-        <button
+  </head>
+  <body
+    class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4"
+  >
+    <nav
+      class="bg-white max-w-2xl w-full p-4 rounded-lg shadow my-3 flex justify-between"
+    >
+      <p class="text-gray-600 text-sm">
+        Créditos:
+        <span id="topCredits" class="font-bold text-lg text-indigo-600">0</span>
+        (1 crédito = 1 video)
+        <br />
+        <span class="text-xs text-gray-600"> No se cobran los errores. </span>
+      </p>
+      <button
+        id="topCreditsButton"
+        class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600"
+      >
+        Recargar créditos
+      </button>
+      <button
         id="topLoginButton"
-        class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600 text-xs">
-Iniciar sesión        </button>
+        class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600 text-xs"
+      >
+        Iniciar sesión
+      </button>
     </nav>
 
-<main class="flex items-center bg-white rounded-lg">
-        <!-- Work Card -->
-    <article class="p-8 w-full">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Anima cualquier imagen con IA</h1>
-        <p class="text-gray-600 mb-2 text-center">Sube tu imagen y conviértela en un video MP4 cortito.</p>
-        <p class="text-gray-500 mb-6 text-center text-xs">Soporta: png, jpg y webp.</p>
-        
-        <form id="image-upload-form" enctype="multipart/form-data" class="space-y-4">
-            <div class="flex items-center justify-center w-full" >
-                <label id="dropZone" for="image" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Haz clic para subir</span> o arrastra y suelta</p>
-                        <p class="text-xs text-gray-500">MAX. 10MB</p>
-                    </div>
-                    <input id="image" name="image" type="file" class="hidden" accept="image/png,image/jpeg,image/webp" required />
-                </label>
-            </div>
-            <div id="preview" class="hidden relative">
-                <button 
-                onclick="clearPreview()"
-                class="absolute top-2 right-2 flex items-center justify-center border border-black rounded-full w-8 h-8" >
-                    <svg class="w-5 h-5 text-black hover:text-gray-700 cursor-pointer" 
-     fill="none" 
-     viewBox="0 0 24 24" 
-     stroke="currentColor">
-    <path stroke-linecap="round" 
-          stroke-linejoin="round" 
-          stroke-width="2" 
-          d="M6 18L18 6M6 6l12 12" />
-</svg>
-                </button>
-                <img id="previewImage" src="/images/placeholder.png" alt="Preview" class="max-h-64 mx-auto rounded-lg mb-4" />
-                <video loop muted autoplay id="previewVideo" src="/videos/video_demo.mp4" class="max-h-64 mx-auto rounded-lg"></video>
+    <main class="flex items-center bg-white rounded-lg">
+      <!-- Work Card -->
+      <article class="p-8 w-full">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">
+          Anima cualquier imagen con IA
+        </h1>
+        <p class="text-gray-600 mb-2 text-center">
+          Sube tu imagen y conviértela en un video MP4 cortito.
+        </p>
+        <p class="text-gray-500 mb-6 text-center text-xs">
+          Soporta: png, jpg y webp.
+        </p>
 
-                <p class="text-gray-600 mb-6 text-center">
-                    <a id="videoLinkPlaceholder" class="underline text-2xl text-indigo-600 my-3">Link: </a>
-                    <br>
-                    <span class="text-xs">El video no se almacena. Descargalo pronto y guardalo bien.</span>
+        <form
+          id="image-upload-form"
+          enctype="multipart/form-data"
+          class="space-y-4"
+        >
+          <div class="flex items-center justify-center w-full">
+            <label
+              id="dropZone"
+              for="image"
+              class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+            >
+              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg
+                  class="w-10 h-10 mb-3 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  ></path>
+                </svg>
+                <p class="mb-2 text-sm text-gray-500">
+                  <span class="font-semibold">Haz clic para subir</span> o
+                  arrastra y suelta
                 </p>
+                <p class="text-xs text-gray-500">MAX. 10MB</p>
+              </div>
+              <input
+                id="image"
+                name="image"
+                type="file"
+                class="hidden"
+                accept="image/png,image/jpeg,image/webp"
+                required
+              />
+            </label>
+          </div>
+          <div id="preview" class="hidden relative">
+            <button
+              onclick="clearPreview()"
+              class="absolute top-2 right-2 flex items-center justify-center border border-black rounded-full w-8 h-8"
+            >
+              <svg
+                class="w-5 h-5 text-black hover:text-gray-700 cursor-pointer"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <img
+              id="previewImage"
+              src="/images/placeholder.png"
+              alt="Preview"
+              class="max-h-64 mx-auto rounded-lg mb-4"
+            />
+            <video
+              loop
+              muted
+              autoplay
+              id="previewVideo"
+              src="/videos/video_demo.mp4"
+              class="max-h-64 mx-auto rounded-lg"
+            ></video>
 
-                <div  id="spinner" class="hidden flex justify-center my-4">
-                    <div class="animate-spin rounded-full h-5 w-5 border-2 border-b-indigo-600" ></div>
-                </div>
+            <p class="text-gray-600 mb-6 text-center">
+              <a
+                id="videoLinkPlaceholder"
+                class="underline text-2xl text-indigo-600 my-3"
+                >Link:
+              </a>
+              <br />
+              <span class="text-xs"
+                >El video no se almacena. Descargalo pronto y guardalo
+                bien.</span
+              >
+            </p>
 
+            <div id="spinner" class="hidden flex justify-center my-4">
+              <div
+                class="animate-spin rounded-full h-5 w-5 border-2 border-b-indigo-600"
+              ></div>
             </div>
+          </div>
         </form>
-        
+
         <div id="result" class="mt-8 p-4 bg-gray-50 rounded-lg hidden">
-            <h3 class="font-medium text-gray-700 mb-2">Resultado:</h3>
-            <div id="resultContent" class="text-sm text-gray-600"></div>
+          <h3 class="font-medium text-gray-700 mb-2">Resultado:</h3>
+          <div id="resultContent" class="text-sm text-gray-600"></div>
         </div>
         <div id="prevVideos" class="mt-8 p-4 bg-gray-50 rounded-lg hidden">
-            <h3 class="font-medium text-gray-700 mb-2">Videos anteriores:</h3>
-            <div id="prevVideosContent" class="text-sm text-gray-600"></div>
+          <h3 class="font-medium text-gray-700 mb-2">Videos anteriores:</h3>
+          <div id="prevVideosContent" class="text-sm text-gray-600"></div>
         </div>
-    </article>
-   
-    <!-- Hosting -->
-    <article id="hostingSection" class="p-8 w-full hidden border-l border-gray-200"> 
-       <header >
-            <h1 id="hostingHeader" class="text-3xl font-bold text-gray-800 mb-2 text-center">¿Quieres hospedar <br> tu video en la nube?</h1>
-            <p class="text-gray-600 mb-2 text-center">Podrás acceder a él desde cualquier lugar.</p>
-            <p class="text-gray-500 mb-6 text-center text-xs">Tecnología CDN Link.</p>
-       </header>
-        <!-- options -->   
+      </article>
+
+      <!-- Hosting -->
+      <article
+        id="hostingSection"
+        class="p-8 w-full hidden border-l border-gray-200"
+      >
+        <header>
+          <h1
+            id="hostingHeader"
+            class="text-3xl font-bold text-gray-800 mb-2 text-center"
+          >
+            ¿Quieres hospedar <br />
+            tu video en la nube?
+          </h1>
+          <p class="text-gray-600 mb-2 text-center">
+            Podrás acceder a él desde cualquier lugar.
+          </p>
+          <p class="text-gray-500 mb-6 text-center text-xs">
+            Tecnología CDN Link.
+          </p>
+        </header>
+        <!-- options -->
         <section id="hostingOptions" class="grid grid-cols-3 gap-4">
-            <button 
-            data-intent="hosting_3_months"               
-            class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
-                <p>3 meses</p>
-                <p class="text-xs">10 créditos</p>
-            </button>
-            <button 
-                data-intent="hosting_6_months"    
-                class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
-                <p>6 meses</p>
-                <p class="text-xs">15 créditos</p>
-            </button>
-            <button 
-                data-intent="hosting_1_year"        
-                class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
-                <p>1 año</p>
-                <p class="text-xs">25 créditos</p>
-            </button>
+          <button
+            data-intent="hosting_3_months"
+            class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border"
+          >
+            <p>3 meses</p>
+            <p class="text-xs">10 créditos</p>
+          </button>
+          <button
+            data-intent="hosting_6_months"
+            class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border"
+          >
+            <p>6 meses</p>
+            <p class="text-xs">15 créditos</p>
+          </button>
+          <button
+            data-intent="hosting_1_year"
+            class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border"
+          >
+            <p>1 año</p>
+            <p class="text-xs">25 créditos</p>
+          </button>
         </section>
-        <div id="hostingError" class="text-red-500 text-xs hidden my-2 grid place-items-center"></div>
+        <div
+          id="hostingError"
+          class="text-red-500 text-xs hidden my-2 grid place-items-center"
+        ></div>
         <section id="hostingResult" class="hidden">
-            <div class="flex items-center gap-2 mt-4 mb-1">
-                <input type="text" id="hostingURLInput" placeholder="URL" 
-                    class="flex-1 border border-indigo-600 rounded-lg px-4 py-2">
-                <button id="copyButton" class="p-2 rounded-lg hover:bg-gray-100" title="Copiar URL">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-600">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
-            </div>
-            <p class="text-xs text-gray-400">Este enlace es de acceso público.</p>
-           
+          <div class="flex items-center gap-2 mt-4 mb-1">
+            <input
+              type="text"
+              id="hostingURLInput"
+              placeholder="URL"
+              class="flex-1 border border-indigo-600 rounded-lg px-4 py-2"
+            />
+            <button
+              id="copyButton"
+              class="p-2 rounded-lg hover:bg-gray-100"
+              title="Copiar URL"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-5 h-5 text-gray-600"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-xs text-gray-400">Este enlace es de acceso público.</p>
         </section>
-    </article> 
-</main>
+      </article>
+    </main>
     <!-- footer -->
     <footer class="">
-        <p class="text-center text-gray-600 text-xs my-3">© 2025 AI Image to Video. by: 
+      <p class="text-center text-gray-600 text-xs my-3">
+        © 2025 AI Image to Video. by:
 
-            <a href="https://fixter.org" class="underline text-indigo-600">Fixter.org</a>
-        </p>
+        <a href="https://fixter.org" class="underline text-indigo-600"
+          >Fixter.org</a
+        >
+      </p>
     </footer>
 
     <!-- // modal -->
-     <article id="creditsModal" class="hidden">
-        <div  class="fixed inset-0 z-50 overflow-y-auto">
-            <button id="closeModalButton" class="absolute top-6 right-6 z-10 text-white">
-                Cerrar
-            </button>
-            <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-50 backdrop-blur-sm">
-                <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <h2 class="text-lg font-semibold mb-4">Compra un paquete de créditos</h2>
-                    <p class="text-xs">Compra solo los que necesites o aprovecha la oferta.</p>
-                    
-                    <section class="grid grid-cols-3 gap-4">
-                        <button 
-                        data-intent="credits_10"               
-                        class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
-                        <p>10 créditos</p>
-                        <p class="text-xs">$150</p>
-                        </button>
-                        <button
-                        data-intent="credits_20"               
-                         class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
-                            <p>20  créditos</p>
-                            <p class="text-xs">$280</p>
-                            </button>
-                        <button 
-                        data-intent="credits_100"               
-                            class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
-                                <p>100  créditos</p>
-                                <p class="text-xs">$999</p>
-                            </button>
-                                            <button 
-                            disabled
-                            onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
-                              <p>500  créditos</p>
-                            <p class="text-xs">$3,900</p>
-                            </button>
-                <button disabled onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
-                              <p>1000  créditos</p>
-                            <p class="text-xs">$9,900</p>
-                            </button>
-                      <button disabled onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
-                                <p>2000  créditos</p>
-                            <p class="text-xs">$19,900</p>
-                            </button>
-                    </section>
-                
-                </div>
-            </div>
+    <article id="creditsModal" class="hidden">
+      <div class="fixed inset-0 z-50 overflow-y-auto">
+        <button
+          id="closeModalButton"
+          class="absolute top-6 right-6 z-10 text-white"
+        >
+          Cerrar
+        </button>
+        <div
+          class="flex items-center justify-center min-h-screen bg-black bg-opacity-50 backdrop-blur-sm"
+        >
+          <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-lg font-semibold mb-4">
+              Compra un paquete de créditos
+            </h2>
+            <p class="text-xs">
+              Compra solo los que necesites o aprovecha la oferta.
+            </p>
+
+            <section class="grid grid-cols-3 gap-4">
+              <button
+                data-intent="credits_10"
+                class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border"
+              >
+                <p>10 créditos</p>
+                <p class="text-xs">$150</p>
+              </button>
+              <button
+                data-intent="credits_20"
+                class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border"
+              >
+                <p>20 créditos</p>
+                <p class="text-xs">$280</p>
+              </button>
+              <button
+                data-intent="credits_100"
+                class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border"
+              >
+                <p>100 créditos</p>
+                <p class="text-xs">$999</p>
+              </button>
+              <button
+                disabled
+                onclick="updateUI()"
+                class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border"
+              >
+                <p>500 créditos</p>
+                <p class="text-xs">$3,900</p>
+              </button>
+              <button
+                disabled
+                onclick="updateUI()"
+                class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border"
+              >
+                <p>1000 créditos</p>
+                <p class="text-xs">$9,900</p>
+              </button>
+              <button
+                disabled
+                onclick="updateUI()"
+                class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border"
+              >
+                <p>2000 créditos</p>
+                <p class="text-xs">$19,900</p>
+              </button>
+            </section>
+          </div>
         </div>
-     </article>
+      </div>
+    </article>
 
-         <!-- // modal login -->
-         <article id="loginModal" class="hidden">
-            <div  class="fixed inset-0 z-50 overflow-y-auto">
-                <button id="closeLoginModalButton" class="absolute top-6 right-6 z-10 text-white">
-                    Cerrar
-                </button>
-                <div class="flex items-center justify-center min-h-screen bg-black bg-opacity-50 backdrop-blur-sm">
-                    <form id="loginForm" class="bg-white p-6 rounded-lg shadow-lg">
-                        <h2 class="text-2xl font-bold mb-4">Iniciar sesión</h2>
-                        <div class="">
-                            <label for="email" class="block text-gray-700 font-medium mb-2">Correo electrónico</label>
-                            <input type="email" id="email" name="email" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                      <span class="text-xs mb-4 text-gray-400">No compartiremos tu correo con nadie.</span>
-                        <div id="loginStatus" class="mb-4 text-sm hidden"></div>
-                        <button id="loginButton" type="submit" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed block ml-auto mt-2 px-4 py-2 rounded enabled:hover:border-black border">
-                           Solicitar llave
-                        </button>
-                    </form>
-                </div>
+    <!-- // modal login -->
+    <article id="loginModal" class="hidden">
+      <div class="fixed inset-0 z-50 overflow-y-auto">
+        <button
+          id="closeLoginModalButton"
+          class="absolute top-6 right-6 z-10 text-white"
+        >
+          Cerrar
+        </button>
+        <div
+          class="flex items-center justify-center min-h-screen bg-black bg-opacity-50 backdrop-blur-sm"
+        >
+          <form id="loginForm" class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-bold mb-4">Iniciar sesión</h2>
+            <div class="">
+              <label for="email" class="block text-gray-700 font-medium mb-2"
+                >Correo electrónico</label
+              >
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-        </article>
+            <span class="text-xs mb-4 text-gray-400"
+              >No compartiremos tu correo con nadie.</span
+            >
+            <div id="loginStatus" class="mb-4 text-sm hidden"></div>
+            <button
+              id="loginButton"
+              type="submit"
+              class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed block ml-auto mt-2 px-4 py-2 rounded enabled:hover:border-black border"
+            >
+              Solicitar llave
+            </button>
+          </form>
+        </div>
+      </div>
+    </article>
 
-        <script>
-            //  @todo refactor
-            // State stuff
-        let state = 'idle';
-        function setState(st){
-            console.log("::STATE::", st)
-          document.dispatchEvent(new CustomEvent('stateChange', {detail: {state: st}})); // dispatch event
-            state=st
-            if(state === 'error'){
-                spinner.classList.add('hidden');
-            }else if(state === 'loading'){
-                spinner.classList.remove('hidden');
-            } else if(state === 'working'){
-                dropZone.classList.add('hidden');
-                result.classList.remove('hidden');
-                spinner.classList.remove('hidden');
-                preview.classList.remove('hidden');
-            }else if(state === 'done'){
-                dropZone.classList.add('hidden');
-                spinner.classList.add('hidden');
-                preview.classList.remove('hidden');
-                result.classList.remove('hidden');
-            } else{ // idle
-                spinner.classList.add('hidden');
-                loginModal.classList.add('hidden')
-            }
+    <script>
+      //  @todo refactor
+      // State stuff
+      let state = "idle";
+      function setState(st) {
+        console.log("::STATE::", st);
+        document.dispatchEvent(
+          new CustomEvent("stateChange", { detail: { state: st } })
+        ); // dispatch event
+        state = st;
+        if (state === "error") {
+          spinner.classList.add("hidden");
+        } else if (state === "loading") {
+          spinner.classList.remove("hidden");
+        } else if (state === "working") {
+          dropZone.classList.add("hidden");
+          result.classList.remove("hidden");
+          spinner.classList.remove("hidden");
+          preview.classList.remove("hidden");
+        } else if (state === "done") {
+          dropZone.classList.add("hidden");
+          spinner.classList.add("hidden");
+          preview.classList.remove("hidden");
+          result.classList.remove("hidden");
+        } else {
+          // idle
+          spinner.classList.add("hidden");
+          loginModal.classList.add("hidden");
         }
-        // UI state reducer
-        const stateReducer = (action) => {
-            switch(action){
-                case 'idle':
-                    hostingSection.classList.add('hidden')
-                    result.classList.add('hidden')            // REMEMBER THIS!!  & MOVE FROM HERE
-                    break
-                case 'loading':
-                    break
-                case 'working':
-                    break
-                case 'done':
-                    hostingSection.classList.remove('hidden')
-                    break
-                case 'error':
-                    break
-                default:
-                    break
-            }
+      }
+      // UI state reducer
+      const stateReducer = (action) => {
+        switch (action) {
+          case "idle":
+            hostingSection.classList.add("hidden");
+            result.classList.add("hidden"); // REMEMBER THIS!!  & MOVE FROM HERE
+            break;
+          case "loading":
+            break;
+          case "working":
+            break;
+          case "done":
+            hostingSection.classList.remove("hidden");
+            break;
+          case "error":
+            break;
+          default:
+            break;
         }
+      };
 
-        // State listener
-        document.addEventListener('stateChange', (event) => {
-            console.log("::STATE_LISTENER::", event.detail)
-            stateReducer(event.detail.state)
-        })
-        </script>
-        
+      // State listener
+      document.addEventListener("stateChange", (event) => {
+        console.log("::STATE_LISTENER::", event.detail);
+        stateReducer(event.detail.state);
+      });
+    </script>
+
     <script src="/js/useFileDrop.js"></script>
     <script>
-// local storage
-        const saveLocal = (videoId) => {
-                    const videIds = localStorage.getItem('videoIds') || '[]';
-                    const videoIds = JSON.parse(videIds);
-                    videoIds.push(videoId);
-                    localStorage.setItem('videoIds', JSON.stringify(videoIds));
-                }
+      // local storage
+      const saveLocal = (videoId) => {
+        const videIds = localStorage.getItem("videoIds") || "[]";
+        const videoIds = JSON.parse(videIds);
+        videoIds.push(videoId);
+        localStorage.setItem("videoIds", JSON.stringify(videoIds));
+      };
 
-                const getLocal = () => {
-                    const videIds = localStorage.getItem('videoIds') || '[]';
-                    const videoIds = JSON.parse(videIds);
-                    return videoIds;
-                }
+      const getLocal = () => {
+        const videIds = localStorage.getItem("videoIds") || "[]";
+        const videoIds = JSON.parse(videIds);
+        return videoIds;
+      };
     </script>
     <script>
-        // Preview image before upload
-        const imageInput = document.getElementById('image');
-        const preview = document.getElementById('preview');
-        const previewImage = document.getElementById('previewImage');
+      // Preview image before upload
+      const imageInput = document.getElementById("image");
+      const preview = document.getElementById("preview");
+      const previewImage = document.getElementById("previewImage");
 
-        // Initialize file drop zone
-        if (window.useFileDrop) {
-            const cleanup = useFileDrop('#dropZone', function(files) {
-                if (imageInput) {
-                    imageInput.files = files;
-                    const event = new Event('change');
-                    imageInput.dispatchEvent(event);
-                }
-            });
-            
-            // Clean up on page unload
-            window.addEventListener('beforeunload', cleanup);
-            window.addEventListener('unload', cleanup);
-        } else {
-            console.error('useFileDrop is not available');
-        }
-
-        // list prev video ids
-        const videoIds = getLocal();
-        console.log("videoIds", videoIds);  
-        const prevVideosContent = document.getElementById('prevVideosContent');
-        if (prevVideosContent && videoIds.length > 0) {
-            prevVideosContent.innerHTML = videoIds.map(id => `<p>${id}</p>`).join('');
-        }
-
-
-        
-        if(!imageInput){
-            console.error('Element with selector #image not found');
-        }
-
-        // ONCHANGE IMAGE INPUT
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(file.size > 10 * 1024 * 1024){
-                alert('El archivo es demasiado grande');
-                return;
-            }
-            if (file) {
-                dropZone.style.display = 'none';
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    previewImage.src = event.target.result;
-                    preview.classList.remove('hidden');
-                    triggerSubmition()
-                }
-                reader.readAsDataURL(file);
-            } else {
-                preview.classList.add('hidden');
-                dropZone.style.display = 'block';
-            }
+      // Initialize file drop zone
+      if (window.useFileDrop) {
+        const cleanup = useFileDrop("#dropZone", function (files) {
+          if (imageInput) {
+            imageInput.files = files;
+            const event = new Event("change");
+            imageInput.dispatchEvent(event);
+          }
         });
 
-        const triggerSubmition = ()=> {
-            const event = new Event('submit');
-            form.dispatchEvent(event);
-        }
+        // Clean up on page unload
+        window.addEventListener("beforeunload", cleanup);
+        window.addEventListener("unload", cleanup);
+      } else {
+        console.error("useFileDrop is not available");
+      }
 
-        // Handle form submission ======================================================================================
-        const form = document.getElementById('image-upload-form');
-        const resultDiv = document.getElementById('result');
-        const resultContent = document.getElementById('resultContent');
-        
-        if (!form) {
-            console.error('Form with ID image-upload-form not found');
+      // list prev video ids
+      const videoIds = getLocal();
+      console.log("videoIds", videoIds);
+      const prevVideosContent = document.getElementById("prevVideosContent");
+      if (prevVideosContent && videoIds.length > 0) {
+        prevVideosContent.innerHTML = videoIds
+          .map((id) => `<p>${id}</p>`)
+          .join("");
+      }
+
+      if (!imageInput) {
+        console.error("Element with selector #image not found");
+      }
+
+      // ONCHANGE IMAGE INPUT
+      imageInput.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (file.size > 10 * 1024 * 1024) {
+          alert("El archivo es demasiado grande");
+          return;
         }
-        
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                setState('loading');
-                try {
-                    const response = await fetch('/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        resultContent.innerHTML = `
+        if (file) {
+          dropZone.style.display = "none";
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            previewImage.src = event.target.result;
+            preview.classList.remove("hidden");
+            triggerSubmition();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.classList.add("hidden");
+          dropZone.style.display = "block";
+        }
+      });
+
+      const triggerSubmition = () => {
+        const event = new Event("submit");
+        form.dispatchEvent(event);
+      };
+
+      // Handle form submission ======================================================================================
+      const form = document.getElementById("image-upload-form");
+      const resultDiv = document.getElementById("result");
+      const resultContent = document.getElementById("resultContent");
+
+      if (!form) {
+        console.error("Form with ID image-upload-form not found");
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        setState("loading");
+        try {
+          const response = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultContent.innerHTML = `
                             <p>✅ Video generadose, esto puede tardar unos segundos.</p>
                         `;
-                        startPolling(data.videoId);
-                    } else {
-                        resultContent.style.color = 'red';
-                        resultContent.textContent = `Error: missing credits or session`;
-                        alert("Por favor, inicia sesión o recarga créditos para subir imágenes.") // @todo Error in response
-                        setState('error');
-                    }
-                    
-                    resultDiv.classList.remove('hidden');
-                    
-                } catch (error) {
-                    console.error('Error:', error);
-                    resultContent.textContent = 'Ocurrió un error al procesar la imagen.';
-                    resultDiv.classList.remove('hidden');
-                }
-        });
+            startPolling(data.videoId);
+          } else {
+            resultContent.style.color = "red";
+            resultContent.textContent = `Error: missing credits or session`;
+            alert(
+              "Por favor, inicia sesión o recarga créditos para subir imágenes."
+            ); // @todo Error in response
+            setState("error");
+          }
 
-        // polling loop
-        let pollingInterval = null;
-        const pollingIntervalTime = 5000; // 5 seconds
-        const maxPollingAttempts = 30; // 5 minutes max (30 attempts * 10 seconds)
-        let pollingAttempts = 0;
-        
-        function clearPolling() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-                pollingInterval = null;
-            }
-            // Reset polling attempts counter
-            pollingAttempts = 0;
+          resultDiv.classList.remove("hidden");
+        } catch (error) {
+          console.error("Error:", error);
+          resultContent.textContent = "Ocurrió un error al procesar la imagen.";
+          resultDiv.classList.remove("hidden");
         }
+      });
 
-        function showError(message) {
-            if (!resultContent) return;
-            resultContent.innerHTML = `
+      // polling loop
+      let pollingInterval = null;
+      const pollingIntervalTime = 5000; // 5 seconds
+      const maxPollingAttempts = 30; // 5 minutes max (30 attempts * 10 seconds)
+      let pollingAttempts = 0;
+
+      function clearPolling() {
+        if (pollingInterval) {
+          clearInterval(pollingInterval);
+          pollingInterval = null;
+        }
+        // Reset polling attempts counter
+        pollingAttempts = 0;
+      }
+
+      function showError(message) {
+        if (!resultContent) return;
+        resultContent.innerHTML = `
                 <p class="text-red-600">❌ ${message}</p>
                 <p class="text-sm text-gray-600 mt-2">Por favor, inténtalo de nuevo más tarde o contacta al soporte si el problema persiste.</p>
             `;
-            clearPolling();
-            setState('error');
+        clearPolling();
+        setState("error");
+      }
+
+      async function pollVideoStatus(videoId) {
+        if (!resultContent) return;
+
+        // Prevent infinite polling
+        pollingAttempts++;
+        if (pollingAttempts > maxPollingAttempts) {
+          showError(
+            "Tiempo de espera agotado. El video está tomando más tiempo de lo esperado."
+          );
+          clearPolling(); // Clear on timeout
+          return;
         }
-        
-        async function pollVideoStatus(videoId) {
-            if (!resultContent) return;
-            
-            // Prevent infinite polling
-            pollingAttempts++;
-            if (pollingAttempts > maxPollingAttempts) {
-                showError('Tiempo de espera agotado. El video está tomando más tiempo de lo esperado.');
-                clearPolling(); // Clear on timeout
-                return;
+
+        try {
+          console.log(
+            `Verificando estado del video (Intento ${pollingAttempts}/${maxPollingAttempts})...`
+          );
+          const response = await fetch(`/poll?videoId=${videoId}`);
+          const contentType = response.headers.get("content-type");
+
+          // Check if response is a video
+          if (contentType && contentType.includes("video/")) {
+            // Get the video blob and create object URL
+            const videoBlob = await response.blob();
+            const videoUrl = URL.createObjectURL(videoBlob);
+
+            // Update the video element
+            const videoElement = document.getElementById("previewVideo");
+            if (videoElement) {
+              videoElement.src = videoUrl;
+              videoElement.classList.remove("hidden");
+              videoElement.load(); // Force reload the video
             }
-            
-            try {
-                console.log(`Verificando estado del video (Intento ${pollingAttempts}/${maxPollingAttempts})...`);
-                const response = await fetch(`/poll?videoId=${videoId}`);
-                const contentType = response.headers.get('content-type');
-                
-                // Check if response is a video
-                if (contentType && contentType.includes('video/')) {
-                    // Get the video blob and create object URL
-                    const videoBlob = await response.blob();
-                    const videoUrl = URL.createObjectURL(videoBlob);
-                    
-                    // Update the video element
-                    const videoElement = document.getElementById('previewVideo');
-                    if (videoElement) {
-                        videoElement.src = videoUrl;
-                        videoElement.classList.remove('hidden');
-                        videoElement.load(); // Force reload the video
-                    }
-                    
-                    // Update the download link
-                    const videoLinkPlaceholder = document.getElementById('videoLinkPlaceholder');
-                    if (videoLinkPlaceholder) {
-                        videoLinkPlaceholder.href = videoUrl;
-                        videoLinkPlaceholder.download = `${videoId}.mp4`;
-                        videoLinkPlaceholder.parentElement.classList.remove('hidden');
-                        videoLinkPlaceholder.textContent = 'Descargar video';
-                    }
-                    
-                    // Show success message
-                    resultContent.innerHTML = `
+
+            // Update the download link
+            const videoLinkPlaceholder = document.getElementById(
+              "videoLinkPlaceholder"
+            );
+            if (videoLinkPlaceholder) {
+              videoLinkPlaceholder.href = videoUrl;
+              videoLinkPlaceholder.download = `${videoId}.mp4`;
+              videoLinkPlaceholder.parentElement.classList.remove("hidden");
+              videoLinkPlaceholder.textContent = "Descargar video";
+            }
+
+            // Show success message
+            resultContent.innerHTML = `
                         <p class="text-green-600">✅ Video generado exitosamente!</p>
                         <p class="text-sm text-gray-600 mt-2">Puedes ver una vista previa arriba y descargar el video.</p>
                     `;
-                    clearPolling();
-                    setState('done');
-                    saveLocal(videoId)
-                    document.dispatchEvent(new CustomEvent('update_user'))
-                } 
-                // Handle JSON response (processing or error)
-                else {
-                    try {
-                        const data = await response.json();
-                        
-                        if (response.status === 202) {
-                            // Still processing
-                            resultContent.innerHTML = `
+            clearPolling();
+            setState("done");
+            saveLocal(videoId);
+            document.dispatchEvent(new CustomEvent("update_user"));
+          }
+          // Handle JSON response (processing or error)
+          else {
+            try {
+              const data = await response.json();
+
+              if (response.status === 202) {
+                // Still processing
+                resultContent.innerHTML = `
                                 <div class="flex items-center gap-2">
-                                    <p>${data.message || 'Procesando video...'}</p>
+                                    <p>${data.message || "Procesando video..."}</p>
                                 </div>
                                 <p class="text-sm text-gray-600 mt-2">
                                     Intento ${pollingAttempts} de ${maxPollingAttempts}. 
@@ -485,169 +647,183 @@ Iniciar sesión        </button>
                                     <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${Math.min(100, (pollingAttempts / maxPollingAttempts) * 100)}%"></div>
                                 </div>
                             `;
-                        } else if (response.status === 404) {
-                            // Video not found
-                            showError('El video solicitado no fue encontrado. Por favor, intenta subir la imagen nuevamente.');
-                        } else if (response.status >= 400) {
-                            // Other errors
-                            showError(data.message || 'Ocurrió un error al procesar tu video. Por favor, inténtalo de nuevo.');
-                        }
-                    } catch (jsonError) {
-                        console.error('Error parsing JSON response:', jsonError);
-                        showError('Error inesperado al procesar la respuesta del servidor.');
-                    }
-                }
-                
-                resultDiv.classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Error al obtener el estado del video:', error);
-                if (resultContent) {
-                    resultContent.textContent = 'Ocurrió un error al obtener el estado del video.';
-                    resultDiv.classList.remove('hidden');
-                }
-                clearPolling(); // Clear on error
+              } else if (response.status === 404) {
+                // Video not found
+                showError(
+                  "El video solicitado no fue encontrado. Por favor, intenta subir la imagen nuevamente."
+                );
+              } else if (response.status >= 400) {
+                // Other errors
+                showError(
+                  data.message ||
+                    "Ocurrió un error al procesar tu video. Por favor, inténtalo de nuevo."
+                );
+              }
+            } catch (jsonError) {
+              console.error("Error parsing JSON response:", jsonError);
+              showError(
+                "Error inesperado al procesar la respuesta del servidor."
+              );
             }
-        }
-        
-        // Start polling
-        function startPolling(videoId) {
-            setState('working');
-            clearPolling(); // Clear any existing interval
-            pollingInterval = setInterval(() => {
-                pollVideoStatus(videoId);
-            }, pollingIntervalTime);
-            
-            // Set a timeout to prevent memory leaks (e.g., if user navigates away)
-            window.addEventListener('beforeunload', clearPolling);
-            window.addEventListener('unload', clearPolling);
-        }
+          }
 
-        // Clear preview
-        const clearPreview = () => {
-            preview.classList.add('hidden');
-            dropZone.style.display = 'block';
-            imageInput.value = '';
-            setState('idle');
+          resultDiv.classList.remove("hidden");
+        } catch (error) {
+          console.error("Error al obtener el estado del video:", error);
+          if (resultContent) {
+            resultContent.textContent =
+              "Ocurrió un error al obtener el estado del video.";
+            resultDiv.classList.remove("hidden");
+          }
+          clearPolling(); // Clear on error
         }
+      }
+
+      // Start polling
+      function startPolling(videoId) {
+        setState("working");
+        clearPolling(); // Clear any existing interval
+        pollingInterval = setInterval(() => {
+          pollVideoStatus(videoId);
+        }, pollingIntervalTime);
+
+        // Set a timeout to prevent memory leaks (e.g., if user navigates away)
+        window.addEventListener("beforeunload", clearPolling);
+        window.addEventListener("unload", clearPolling);
+      }
+
+      // Clear preview
+      const clearPreview = () => {
+        preview.classList.add("hidden");
+        dropZone.style.display = "block";
+        imageInput.value = "";
+        setState("idle");
+      };
     </script>
     <script>
-        let showCreditsModal = false
-        // update hack
-        const updateUI = () => {
-            if(!showCreditsModal){
-                creditsModal.classList.add('hidden')
-            }else{
-                creditsModal.classList.remove('hidden')
-            }
+      let showCreditsModal = false;
+      // update hack
+      const updateUI = () => {
+        if (!showCreditsModal) {
+          creditsModal.classList.add("hidden");
+        } else {
+          creditsModal.classList.remove("hidden");
         }
-        // Credits stuff    
-        const topCreditsButton = document.getElementById('topCreditsButton');
-        const closeModalButton = document.getElementById('closeModalButton');
-// listeners
-        topCreditsButton.addEventListener('click', () => {
-            showCreditsModal = true
-            updateUI()
-        })
+      };
+      // Credits stuff
+      const topCreditsButton = document.getElementById("topCreditsButton");
+      const closeModalButton = document.getElementById("closeModalButton");
+      // listeners
+      topCreditsButton.addEventListener("click", () => {
+        showCreditsModal = true;
+        updateUI();
+      });
 
-        closeModalButton.addEventListener('click', () => {
-            showCreditsModal = false
-            updateUI()
-        })
+      closeModalButton.addEventListener("click", () => {
+        showCreditsModal = false;
+        updateUI();
+      });
 
-        topCreditsButton.addEventListener('click', () => {
+      topCreditsButton.addEventListener("click", () => {
+        updateUI();
+      });
 
-            updateUI()
-        })
+      // get checkout urls and set listener
+      const setStripeLinks = async () => {
+        const response = await fetch("/checkout");
+        const data = await response.json();
 
-        // get checkout urls and set listener
-        const setStripeLinks = async()=>{
-            const response = await fetch('/checkout')
-                const data = await response.json()
-         
-                const urls = data.urls
-                urls.forEach((url, index) => {
-                document.querySelectorAll(`.credits_button`)[index].addEventListener('click', () => (window.location.href = url.url))
-                })
-        }
-
-     window.addEventListener('DOMContentLoaded', setStripeLinks) // triggering at start
-
-    </script>
-    <script>
-        // login modal
-        const loginModal = document.getElementById('loginModal');
-        const closeLoginModalButton = document.getElementById('closeLoginModalButton');
-        closeLoginModalButton.addEventListener('click', () => {
-            loginModal.classList.add('hidden')
-        })
-
-        // submit login
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = e.target.email.value.trim();
-            const loginButton = document.getElementById('loginButton');
-            const loginStatus = document.getElementById('loginStatus');
-            
-            if (!email) {
-                loginStatus.textContent = 'Por favor ingresa un correo electrónico';
-                loginStatus.classList.remove('hidden', 'text-green-500');
-                loginStatus.classList.add('text-red-500');
-                return;
-            }
-
-            loginButton.disabled = true;
-            loginButton.textContent = 'Enviando...';
-            loginStatus.textContent = 'Enviando enlace mágico...';
-            loginStatus.classList.remove('hidden', 'text-red-500');
-            loginStatus.classList.add('text-blue-500');
-
-            try {
-                // actual call
-                const response = await fetch(`/magic-link?email=${encodeURIComponent(email)}`);
-                const data = await response.json();
-
-                console.log("::DATA::",data)
-                
-                if (response.ok) {
-                    loginStatus.textContent = '¡Revisa tu correo para el enlace de inicio de sesión!';
-                    loginStatus.classList.remove('text-blue-500', 'text-red-500');
-                    loginStatus.classList.add('text-green-500');
-                    
-                    // En development, NO SE ENVIAN CORREOS
-                    if (data.debug && data.debug.message) {
-                        console.log('Magic Link:', data.debug.message);
-                    }
-                    
-                    // Close modal after a short delay
-                    setTimeout(() => {
-                        loginModal.classList.add('hidden');
-                        loginStatus.textContent = '';
-                        loginStatus.classList.add('hidden');
-                        loginForm.reset();
-                    }, 5000);
-                } else {
-                    throw new Error(data.error || 'Error al enviar el enlace');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                loginStatus.textContent = error.message || 'Error al enviar el enlace. Intenta de nuevo.';
-                loginStatus.classList.remove('text-blue-500', 'text-green-500');
-                loginStatus.classList.add('text-red-500');
-            } finally {
-                loginButton.disabled = false;
-                loginButton.textContent = 'Enviar';
-            }
+        const urls = data.urls;
+        urls.forEach((url, index) => {
+          document
+            .querySelectorAll(`.credits_button`)
+            [
+              index
+            ].addEventListener("click", () => (window.location.href = url.url));
         });
+      };
+
+      window.addEventListener("DOMContentLoaded", setStripeLinks); // triggering at start
+    </script>
+    <script>
+      // login modal
+      const loginModal = document.getElementById("loginModal");
+      const closeLoginModalButton = document.getElementById(
+        "closeLoginModalButton"
+      );
+      closeLoginModalButton.addEventListener("click", () => {
+        loginModal.classList.add("hidden");
+      });
+
+      // submit login
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = e.target.email.value.trim();
+        const loginButton = document.getElementById("loginButton");
+        const loginStatus = document.getElementById("loginStatus");
+
+        if (!email) {
+          loginStatus.textContent = "Por favor ingresa un correo electrónico";
+          loginStatus.classList.remove("hidden", "text-green-500");
+          loginStatus.classList.add("text-red-500");
+          return;
+        }
+
+        loginButton.disabled = true;
+        loginButton.textContent = "Enviando...";
+        loginStatus.textContent = "Enviando enlace mágico...";
+        loginStatus.classList.remove("hidden", "text-red-500");
+        loginStatus.classList.add("text-blue-500");
+
+        try {
+          // actual call
+          const response = await fetch(
+            `/magic-link?email=${encodeURIComponent(email)}`
+          );
+          const data = await response.json();
+
+          console.log("::DATA::", data);
+
+          if (response.ok) {
+            loginStatus.textContent =
+              "¡Revisa tu correo para el enlace de inicio de sesión!";
+            loginStatus.classList.remove("text-blue-500", "text-red-500");
+            loginStatus.classList.add("text-green-500");
+
+            // En development, NO SE ENVIAN CORREOS
+            if (data.debug && data.debug.message) {
+              console.log("Magic Link:", data.debug.message);
+            }
+
+            // Close modal after a short delay
+            setTimeout(() => {
+              loginModal.classList.add("hidden");
+              loginStatus.textContent = "";
+              loginStatus.classList.add("hidden");
+              loginForm.reset();
+            }, 5000);
+          } else {
+            throw new Error(data.error || "Error al enviar el enlace");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          loginStatus.textContent =
+            error.message || "Error al enviar el enlace. Intenta de nuevo.";
+          loginStatus.classList.remove("text-blue-500", "text-green-500");
+          loginStatus.classList.add("text-red-500");
+        } finally {
+          loginButton.disabled = false;
+          loginButton.textContent = "Enviar";
+        }
+      });
     </script>
 
     <script>
-               // / hacks
-               setState('done')
+      // / hacks
+      setState("idle");
     </script>
     <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
     <script src="/js/hosting_app.js"></script>
     <script src="/js/user-session.js"></script>
-</body>
+  </body>
 </html>
-</article>
