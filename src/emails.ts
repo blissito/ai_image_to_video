@@ -18,24 +18,24 @@ export const getSesTransport = () => {
   return nodemailer.createTransport({
     SES: {
       sesClient: getSesClient(),
-      SendEmailCommand  
+      SendEmailCommand,
     },
   });
 };
 
-export const getSesRemitent = () => 
-  process.env.SES_REMITENT || 'noreply@example.com';
+export const getSesRemitent = () =>
+  process.env.SES_REMITENT || "noreply@example.com";
 
-const isDev = process.env.NODE_ENV === 'development';
-const location = isDev ? 'http://localhost:3000' : 'https://image-to-video.fly.dev';
-
-
+const isDev = process.env.NODE_ENV === "development";
+const location = isDev
+  ? "http://localhost:3001"
+  : "https://image-to-video.fly.dev";
 
 // EMAIL SENDERS
 export const sendMagicLink = async (email: string) => {
   const token = generateMagicToken(email);
   const magicLink = `${location}/magic-link?token=${token}`;
-  
+
   const html = `
     <h1>Link de inicio de sesión 💽</h1>
     <p>Por favor, haz clic en el siguiente enlace para iniciar sesión:</p>
@@ -44,22 +44,22 @@ export const sendMagicLink = async (email: string) => {
   `;
 
   if (isDev) {
-    console.log('Development mode - Email would be sent to:', email);
-    console.log('Magic Link:', magicLink);
-    return { message: 'Check console for magic link (development mode)' };
+    console.log("Development mode - Email would be sent to:", email);
+    console.log("Magic Link:", magicLink);
+    return { message: magicLink };
   }
 
   try {
     const r = await getSesTransport().sendMail({
       from: getSesRemitent(),
       to: email,
-      subject: '🪙 Recupera tus créditos',
+      subject: "🪙 Recupera tus créditos",
       html,
     });
-    console.info("::EMAIL_SENT::",r)
-    return { success: true, message: 'Magic link sent successfully' };
+    console.info("::EMAIL_SENT::", r);
+    return { success: true, message: "Magic link sent successfully" };
   } catch (err) {
-    console.error('Error sending email:', err);
-    return { success: false, message: 'Error sending email' };
+    console.error("Error sending email:", err);
+    return { success: false, message: "Error sending email" };
   }
 };

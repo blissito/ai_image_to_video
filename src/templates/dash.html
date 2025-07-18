@@ -25,7 +25,10 @@
         class="text-gray-600 hover:text-gray-800 hover:underline pl-3 hover:border-gray-600 text-xs">
 Iniciar sesión        </button>
     </nav>
-    <article class="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
+
+<main class="flex items-center bg-white rounded-lg">
+        <!-- Work Card -->
+    <article class="p-8 w-full">
         <h1 class="text-3xl font-bold text-gray-800 mb-2 text-center">Anima cualquier imagen con IA</h1>
         <p class="text-gray-600 mb-2 text-center">Sube tu imagen y conviértela en un video MP4 cortito.</p>
         <p class="text-gray-500 mb-6 text-center text-xs">Soporta: png, jpg y webp.</p>
@@ -57,8 +60,8 @@ Iniciar sesión        </button>
           d="M6 18L18 6M6 6l12 12" />
 </svg>
                 </button>
-                <img id="previewImage" src="#" alt="Preview" class="max-h-64 mx-auto rounded-lg mb-4" />
-                <video loop muted autoplay id="previewVideo" src="https://cdn.openart.ai/assets/video-tutorial-thumbnail-1440.mp4" class="max-h-64 mx-auto rounded-lg"></video>
+                <img id="previewImage" src="/images/placeholder.png" alt="Preview" class="max-h-64 mx-auto rounded-lg mb-4" />
+                <video loop muted autoplay id="previewVideo" src="/videos/video_demo.mp4" class="max-h-64 mx-auto rounded-lg"></video>
 
                 <p class="text-gray-600 mb-6 text-center">
                     <a id="videoLinkPlaceholder" class="underline text-2xl text-indigo-600 my-3">Link: </a>
@@ -82,6 +85,52 @@ Iniciar sesión        </button>
             <div id="prevVideosContent" class="text-sm text-gray-600"></div>
         </div>
     </article>
+   
+    <!-- Hosting -->
+    <article id="hostingSection" class="p-8 w-full hidden border-l border-gray-200"> 
+       <header >
+            <h1 id="hostingHeader" class="text-3xl font-bold text-gray-800 mb-2 text-center">¿Quieres hospedar <br> tu video en la nube?</h1>
+            <p class="text-gray-600 mb-2 text-center">Podrás acceder a él desde cualquier lugar.</p>
+            <p class="text-gray-500 mb-6 text-center text-xs">Tecnología CDN Link.</p>
+       </header>
+        <!-- options -->   
+        <section id="hostingOptions" class="grid grid-cols-3 gap-4">
+            <button 
+            data-intent="hosting_3_months"               
+            class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
+                <p>3 meses</p>
+                <p class="text-xs">10 créditos</p>
+            </button>
+            <button 
+                data-intent="hosting_6_months"    
+                class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
+                <p>6 meses</p>
+                <p class="text-xs">15 créditos</p>
+            </button>
+            <button 
+                data-intent="hosting_1_year"        
+                class="hosting_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
+                <p>1 año</p>
+                <p class="text-xs">25 créditos</p>
+            </button>
+        </section>
+        <div id="hostingError" class="text-red-500 text-xs hidden my-2 grid place-items-center"></div>
+        <section id="hostingResult" class="hidden">
+            <div class="flex items-center gap-2 mt-4 mb-1">
+                <input type="text" id="hostingURLInput" placeholder="URL" 
+                    class="flex-1 border border-indigo-600 rounded-lg px-4 py-2">
+                <button id="copyButton" class="p-2 rounded-lg hover:bg-gray-100" title="Copiar URL">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-600">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400">Este enlace es de acceso público.</p>
+           
+        </section>
+    </article> 
+</main>
     <!-- footer -->
     <footer class="">
         <p class="text-center text-gray-600 text-xs my-3">© 2025 AI Image to Video. by: 
@@ -102,25 +151,25 @@ Iniciar sesión        </button>
                     <p class="text-xs">Compra solo los que necesites o aprovecha la oferta.</p>
                     
                     <section class="grid grid-cols-3 gap-4">
-                    <button 
-
+                        <button 
+                        data-intent="credits_10"               
                         class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded hover:border-black border">
                         <p>10 créditos</p>
                         <p class="text-xs">$150</p>
                         </button>
-                    <button
-
+                        <button
+                        data-intent="credits_20"               
                          class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
                             <p>20  créditos</p>
                             <p class="text-xs">$280</p>
                             </button>
-                    <button 
-
+                        <button 
+                        data-intent="credits_100"               
                             class="credits_button active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
                                 <p>100  créditos</p>
                                 <p class="text-xs">$999</p>
                             </button>
-                   <button 
+                                            <button 
                             disabled
                             onclick="updateUI()" class="disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed enabled:active:scale-[.98] mt-4 px-4 py-2 rounded enabled:hover:border-black border">
                               <p>500  créditos</p>
@@ -135,6 +184,7 @@ Iniciar sesión        </button>
                             <p class="text-xs">$19,900</p>
                             </button>
                     </section>
+                
                 </div>
             </div>
         </div>
@@ -164,6 +214,61 @@ Iniciar sesión        </button>
             </div>
         </article>
 
+        <script>
+            //  @todo refactor
+            // State stuff
+        let state = 'idle';
+        function setState(st){
+            console.log("::STATE::", st)
+          document.dispatchEvent(new CustomEvent('stateChange', {detail: {state: st}})); // dispatch event
+            state=st
+            if(state === 'error'){
+                spinner.classList.add('hidden');
+            }else if(state === 'loading'){
+                spinner.classList.remove('hidden');
+            } else if(state === 'working'){
+                dropZone.classList.add('hidden');
+                result.classList.remove('hidden');
+                spinner.classList.remove('hidden');
+                preview.classList.remove('hidden');
+            }else if(state === 'done'){
+                dropZone.classList.add('hidden');
+                spinner.classList.add('hidden');
+                preview.classList.remove('hidden');
+                result.classList.remove('hidden');
+            } else{ // idle
+                spinner.classList.add('hidden');
+                loginModal.classList.add('hidden')
+            }
+        }
+        // UI state reducer
+        const stateReducer = (action) => {
+            switch(action){
+                case 'idle':
+                    hostingSection.classList.add('hidden')
+                    result.classList.add('hidden')            // REMEMBER THIS!!  & MOVE FROM HERE
+                    break
+                case 'loading':
+                    break
+                case 'working':
+                    break
+                case 'done':
+                    hostingSection.classList.remove('hidden')
+                    break
+                case 'error':
+                    break
+                default:
+                    break
+            }
+        }
+
+        // State listener
+        document.addEventListener('stateChange', (event) => {
+            console.log("::STATE_LISTENER::", event.detail)
+            stateReducer(event.detail.state)
+        })
+        </script>
+        
     <script src="/js/useFileDrop.js"></script>
     <script>
 // local storage
@@ -211,29 +316,7 @@ Iniciar sesión        </button>
             prevVideosContent.innerHTML = videoIds.map(id => `<p>${id}</p>`).join('');
         }
 
-        let state = 'idle';
-        function setState(st){
-            console.log("::STATE::", st)
-            state=st
-            if(state === 'error'){
-                spinner.classList.add('hidden');
-            }else if(state === 'loading'){
-                spinner.classList.remove('hidden');
-            } else if(state === 'working'){
-                dropZone.classList.add('hidden');
-                result.classList.remove('hidden');
-                spinner.classList.remove('hidden');
-                preview.classList.remove('hidden');
-            }else if(state === 'done'){
-                dropZone.classList.add('hidden');
-                spinner.classList.add('hidden');
-                preview.classList.remove('hidden');
-                result.classList.remove('hidden');
-            } else{ // idle
-                spinner.classList.add('hidden');
-                loginModal.classList.add('hidden')
-            }
-        }
+
         
         if(!imageInput){
             console.error('Element with selector #image not found');
@@ -445,6 +528,7 @@ Iniciar sesión        </button>
             preview.classList.add('hidden');
             dropZone.style.display = 'block';
             imageInput.value = '';
+            setState('idle');
         }
     </script>
     <script>
@@ -498,10 +582,7 @@ Iniciar sesión        </button>
             loginModal.classList.add('hidden')
         })
 
-        topLoginButton.addEventListener('click', () => {
-            loginModal.classList.remove('hidden')
-        })
-
+        // submit login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = e.target.email.value.trim();
@@ -522,6 +603,7 @@ Iniciar sesión        </button>
             loginStatus.classList.add('text-blue-500');
 
             try {
+                // actual call
                 const response = await fetch(`/magic-link?email=${encodeURIComponent(email)}`);
                 const data = await response.json();
 
@@ -543,7 +625,7 @@ Iniciar sesión        </button>
                         loginStatus.textContent = '';
                         loginStatus.classList.add('hidden');
                         loginForm.reset();
-                    }, 10000);
+                    }, 5000);
                 } else {
                     throw new Error(data.error || 'Error al enviar el enlace');
                 }
@@ -557,44 +639,15 @@ Iniciar sesión        </button>
                 loginButton.textContent = 'Enviar';
             }
         });
-
-        const checkForUser = async()=> {
-            console.log("Looking for user 👨🏻‍💻")
-          const response = await fetch('/session',{
-            includeCredentials: true
-          });
-          const data = await response.json();
-          if(data.success){
-            loginModal.classList.add('hidden');
-
-            // show credits
-            topCredits.textContent = data.user.credits;
-
-            topLoginButton.innerHTML = `
-                <div>
-                <p>${data.user.email}</p>
-                <span class="text-xs">Cerrar sesión</span>
-                </div>
-                `;
-// Logout listener
-            topLoginButton.addEventListener('click', () => {
-                // document.cookie = "__session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // nice!
-                fetch('/logout',{includeCredentials: true})
-                topLoginButton.innerHTML = 'Iniciar sesión';
-                topCredits.textContent = '0';
-                setState('idle')
-                topLoginButton.addEventListener('click', () => {    
-                    loginModal.classList.remove('hidden')
-                })
-            })
-          }
-
-        }
-
-        // check if user is logged in
-        document.addEventListener('update_user',checkForUser )
-        document.addEventListener('DOMContentLoaded',checkForUser )
     </script>
+
+    <script>
+               // / hacks
+               setState('done')
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+    <script src="/js/hosting_app.js"></script>
+    <script src="/js/user-session.js"></script>
 </body>
 </html>
 </article>
