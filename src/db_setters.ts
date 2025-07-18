@@ -1,4 +1,4 @@
-import { db } from "./db/turso";
+import { db } from "./db/turso.js";
 
 export const updateUserCredits = async ({
   email,

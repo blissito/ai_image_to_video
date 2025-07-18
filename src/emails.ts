@@ -1,12 +1,12 @@
 import nodemailer from "nodemailer";
-import { generateMagicToken } from "./tokens";
+import { generateMagicToken } from "./tokens.js";
 import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
 
 let sesClient;
 const getSesClient = () => {
   // @ts-ignore
   sesClient ??= new SESv2Client({
-    region: process.env.AWS_REGION,
+    region: process.env.AWS_SES_REGION || "us-east-2",
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,

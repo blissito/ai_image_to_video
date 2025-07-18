@@ -6,18 +6,18 @@ import path from "path";
 import fs from "fs";
 import multer from "multer";
 import Stripe from "stripe";
-import { putImage } from "./stability_api";
+import { putImage } from "./stability_api.js";
 import axios from "axios";
-import { makeCheckoutUrls } from "./stripe";
+import { makeCheckoutUrls } from "./stripe.js";
 import {
   addBucketLinkToUser,
   getUser,
   sufficientCredits,
   updateUserCredits,
-} from "./db_setters";
-import { sendMagicLink } from "./emails";
-import { verifyMagicToken } from "./tokens";
-import { getPutURL } from "./utils/s3";
+} from "./db_setters.js";
+import { sendMagicLink } from "./emails.js";
+import { verifyMagicToken } from "./tokens.js";
+import { getPutURL } from "./utils/s3.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 

@@ -1,4 +1,4 @@
-import app from './server';
+import app from "./server.js";
 
 // This file serves as the entry point for the application
 // The server is started in server.ts to allow for testing

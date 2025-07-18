@@ -1,13 +1,13 @@
 #!/usr/bin/env ts-node
 
-import { db } from "./db/turso";
+import { db } from "./db/turso.js";
 import {
   getUser,
   updateUserCredits,
   sufficientCredits,
   addBucketLinkToUser,
   updateUserLinks,
-} from "./db_setters";
+} from "./db_setters.js";
 
 // Test configuration
 const TEST_EMAIL = "test-migration@example.com";
