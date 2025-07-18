@@ -463,15 +463,8 @@
         console.error("useFileDrop is not available");
       }
 
-      // list prev video ids
-      const videoIds = getLocal();
-      console.log("videoIds", videoIds);
-      const prevVideosContent = document.getElementById("prevVideosContent");
-      if (prevVideosContent && videoIds.length > 0) {
-        prevVideosContent.innerHTML = videoIds
-          .map((id) => `<p>${id}</p>`)
-          .join("");
-      }
+      // Note: Video history is now handled by user-session.js
+      // It will only show when user is logged in
 
       if (!imageInput) {
         console.error("Element with selector #image not found");

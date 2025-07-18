@@ -56,11 +56,15 @@ const checkForUser = async () => {
       // Reset to login state if no valid session
       topLoginButtonElement.innerHTML = originalButtonText;
       topCreditsElement.textContent = "0";
+      // Hide video history when not logged in
+      prevVideosElement.classList.add("hidden");
     }
   } catch (error) {
     console.error("Error fetching user session:", error);
     topLoginButtonElement.innerHTML = originalButtonText;
     topCreditsElement.textContent = "0";
+    // Hide video history on error
+    prevVideosElement.classList.add("hidden");
   }
 };
 
